@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Lyris Era Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  --walnut:#20160f; --walnut2:#2c1f16; --oak:#4a3424; --iron:#6b6e70;
+  --parch:#f1e5c8; --parch2:#e6d6b0; --ink:#33251a; --ink2:#6e5a45;
+  --brass:#c9973f; --brass2:#e7bd68;
+  --raw:#9a8d7c; --designed:#4f78a6; --built:#62904a; --tuned:#c9973f;
+  --danger:#a5442f;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--walnut);background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 2px,transparent 2px 9px),linear-gradient(var(--walnut2),var(--walnut) 320px);
+  color:var(--parch);font:16px/1.4 "Alegreya Sans",system-ui,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:780px;margin:0 auto;padding:0 16px 120px}
+header.top{position:sticky;top:0;z-index:20;background:rgba(32,22,15,.94);backdrop-filter:blur(6px);border-bottom:2px solid var(--oak);padding:10px 0 0}
+.titlebar{display:flex;align-items:center;gap:10px}
+.brand{font-family:"Alegreya SC",serif;font-weight:700;letter-spacing:.14em;font-size:20px;color:var(--brass2);flex:1;white-space:nowrap}
+.brand small{font-size:12px;letter-spacing:.2em;color:var(--parch2);opacity:.7;margin-left:6px}
+.iconbtn{background:none;border:1px solid var(--oak);border-radius:8px;padding:6px 10px;color:var(--parch2)}
+.tabs{display:flex;gap:4px;margin-top:10px}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;padding:8px 4px;font-family:"Alegreya SC",serif;letter-spacing:.08em;color:var(--parch2);opacity:.65}
+.tab.on{opacity:1;border-color:var(--brass);color:var(--brass2)}
+.tools{display:flex;gap:8px;padding:10px 0;flex-wrap:wrap}
+.tools input[type=search]{flex:1 1 180px;min-width:0;background:var(--walnut2);border:1px solid var(--oak);border-radius:8px;padding:8px 10px}
+.tools select{background:var(--walnut2);border:1px solid var(--oak);border-radius:8px;padding:8px;max-width:48%}
+.chips{display:flex;gap:6px;flex-wrap:wrap;width:100%}
+.chip{border:1px solid var(--oak);background:none;border-radius:999px;padding:3px 10px;font-size:13px;color:var(--parch2);display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--parch);color:var(--ink);border-color:var(--parch)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.s-raw{background:var(--raw)}.s-designed{background:var(--designed)}.s-built{background:var(--built)}.s-tuned{background:var(--tuned)}
+.filterline{font-size:13px;color:var(--brass2);display:flex;gap:8px;align-items:center;margin:4px 0 0}
+.filterline button{background:none;border:0;color:var(--parch2);text-decoration:underline;padding:0}
+
+.phase{margin:22px 0 8px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.phase h2{margin:0;font:700 15px "Alegreya SC",serif;letter-spacing:.16em;color:var(--brass2)}
+.phase .cap{font-size:13px;color:var(--parch2);opacity:.75}
+.era{background:var(--parch);color:var(--ink);border-radius:10px;margin:10px 0;border:2px solid var(--oak);box-shadow:0 2px 0 #0006, inset 0 0 0 1px #fff4}
+.era-h{display:flex;gap:12px;padding:12px 14px;align-items:flex-start;cursor:pointer}
+.num{font:700 13px "Alegreya SC",serif;background:var(--ink);color:var(--parch);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;margin-top:2px}
+.era-t{flex:1;min-width:0}
+.era-t h3{margin:0;font:700 18px "Alegreya SC",serif;letter-spacing:.04em}
+.ms{font-size:14px;color:var(--ink2);margin-top:2px}
+.ms b{color:var(--ink);font-weight:500}
+.bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:#0001;margin-top:8px}
+.bar span{display:block;height:100%}
+.meta{font-size:12px;color:var(--ink2);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+.badge{font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:1px 6px;border:1px solid currentColor}
+.badge.planned{color:var(--ink2)}.badge.progress{color:var(--designed)}.badge.built{color:var(--built)}
+.chev{flex:none;color:var(--ink2);transition:transform .15s;margin-top:4px}
+.era.open .chev{transform:rotate(90deg)}
+.era-b{display:none;border-top:1px dashed #33251a40;padding:6px 10px 12px}
+.era.open .era-b{display:block}
+.sysgrp{margin-top:8px}
+.sysgrp h4{margin:6px 4px 2px;font:500 12px "Alegreya Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.idea{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-radius:6px;cursor:pointer}
+.idea:hover{background:#0000000a}
+.idea .stat{border:0;padding:0;margin-top:4px;width:16px;height:16px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 2px #0002}
+.idea .tt{flex:1;min-width:0}
+.idea .tt b{font-weight:500}
+.idea .tt div{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idea .sl{font-size:11px;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;flex:none}
+.idea.dim{opacity:.55}
+.dirty-mark{color:var(--brass);font-weight:700}
+.era-actions{display:flex;gap:8px;margin:12px 4px 0}
+.btn{border-radius:8px;border:1px solid var(--oak);background:var(--parch2);color:var(--ink);padding:8px 12px;font-weight:500}
+.btn.brass{background:var(--brass);border-color:#8a6424;color:#20160f}
+.btn.ghost{background:none}
+.btn.danger{background:none;color:var(--danger);border-color:var(--danger)}
+.empty{color:var(--ink2);font-size:14px;padding:8px 4px}
+
+/* grid */
+.gridwrap{overflow-x:auto;margin-top:12px;border:2px solid var(--oak);border-radius:10px;background:var(--parch)}
+table.grid{border-collapse:collapse;color:var(--ink);font-size:13px}
+.grid th,.grid td{border:1px solid #33251a22;padding:0}
+.grid thead th{font:500 11px "Alegreya Sans";letter-spacing:.06em;text-transform:uppercase;padding:6px 4px;min-width:62px;height:96px;vertical-align:bottom;background:var(--parch2)}
+.grid thead th span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
+.grid th.rowh{position:sticky;left:0;background:var(--parch2);text-align:left;padding:6px 8px;font:700 13px "Alegreya SC",serif;white-space:nowrap;z-index:1}
+.grid tr.ph th{font:700 11px "Alegreya SC",serif;letter-spacing:.16em;background:var(--ink);color:var(--brass2);padding:4px 8px;text-align:left}
+.grid td button{display:block;width:100%;height:40px;border:0;background:none;padding:4px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.cell em{font-style:normal;font-weight:700}
+.cell .bar{width:36px;margin:0;height:4px}
+.grid td.zero button{color:#33251a40}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--parch2);margin-top:10px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:#0009;z-index:40;display:none}
+.scrim.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--parch);color:var(--ink);border-radius:16px 16px 0 0;max-height:92vh;overflow:auto;padding:16px 16px calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .18s;max-width:780px;margin:0 auto;border-top:3px solid var(--brass)}
+.sheet.on{transform:none}
+.sheet h3{margin:0 0 12px;font:700 18px "Alegreya SC",serif;display:flex;justify-content:space-between;align-items:center}
+.sheet label{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin:12px 0 4px}
+.sheet input,.sheet select,.sheet textarea{width:100%;border:1px solid #33251a40;background:#fffaf0;border-radius:8px;padding:9px 10px;color:var(--ink)}
+.sheet textarea{min-height:90px;resize:vertical}
+.seg{display:flex;border:1px solid #33251a40;border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fffaf0;padding:9px 4px;display:flex;gap:6px;align-items:center;justify-content:center;font-size:14px}
+.seg button+button{border-left:1px solid #33251a30}
+.seg button.on{background:var(--ink);color:var(--parch)}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+.deps{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.deps .chip{color:var(--ink);border-color:#33251a40}
+.sheet .foot{display:flex;gap:8px;margin-top:18px;justify-content:space-between;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--ink2);margin-top:6px}
+.hint a{color:var(--designed)}
+.usedby{font-size:13px;color:var(--ink2);margin-top:6px}
+
+/* save bar */
+.savebar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));pointer-events:none}
+.savebar .in{pointer-events:auto;display:flex;gap:10px;align-items:center;background:var(--ink);border:2px solid var(--brass);color:var(--parch);border-radius:12px;padding:8px 8px 8px 14px;box-shadow:0 6px 20px #000a;max-width:520px;width:100%}
+.savebar .msg{flex:1;font-size:14px}
+.savebar.hide{display:none}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--parch);color:var(--ink);border:2px solid var(--brass);padding:8px 14px;border-radius:10px;z-index:60;font-size:14px;display:none;max-width:92vw}
+.toast.on{display:block}
+
+/* welcome */
+.welcome{background:var(--parch);color:var(--ink);border-radius:12px;border:2px solid var(--oak);padding:20px;margin-top:24px}
+.welcome h2{margin:0 0 6px;font:700 22px "Alegreya SC",serif}
+.welcome ol{padding-left:20px;margin:8px 0}
+.welcome li{margin:4px 0}
+.stats{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap}
+.stats{flex-wrap:nowrap}
+.stat-card{flex:1 1 0;min-width:0;background:var(--walnut2);border:1px solid var(--oak);border-radius:10px;padding:6px 8px}
+.stat-card b{display:block;font:700 18px "Alegreya SC",serif;color:var(--brass2)}
+.stat-card span{font-size:11px;color:var(--parch2);display:flex;gap:5px;align-items:center;white-space:nowrap;overflow:hidden}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="titlebar">
+      <div class="brand">LYRIS <small>ERA TRACKER</small></div>
+      <button class="iconbtn" id="addBtn" title="Add idea">+ Idea</button>
+      <button class="iconbtn" id="setBtn" title="Settings">⚙</button>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="eras">Eras</button>
+      <button class="tab" data-v="grid">Grid</button>
+      <button class="tab" data-v="someday">Someday</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<div class="savebar hide" id="savebar"><div class="in"><div class="msg" id="saveMsg"></div><button class="btn brass" id="saveBtn">Save to GitHub</button></div></div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } };
+const DEFAULTS = { owner: "Penzuin", repo: "Lyris-Voxel", branch: "storybook", path: "design/eras.json", token: "" };
+let cfg = Object.assign({}, DEFAULTS, JSON.parse(LS("lyrisEras.cfg") || "{}"));
+let data = null, sha = null, base = null;            // base: the last copy loaded from / saved to GitHub
+let dirty = new Set(JSON.parse(LS("lyrisEras.dirty") || "[]"));   // idea ids / "era:<id>" changed locally
+let view = "eras", q = "", fStatus = new Set(), fSystem = "", fEra = "", openEras = new Set(JSON.parse(LS("lyrisEras.open") || "[]"));
+const STATUS = ["raw", "designed", "built", "tuned"];
+const STATUS_LABEL = { raw: "Raw idea", designed: "Designed", built: "Built", tuned: "Tuned" };
+const ERA_STATUS = { planned: "Planned", progress: "In progress", built: "Built" };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ROMAN = ["", "I", "II", "III", "IV"];
+
+function toast(t, ms = 2600) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), ms); }
+function saveLocal() { LS("lyrisEras.data", JSON.stringify(data)); LS("lyrisEras.dirty", JSON.stringify([...dirty])); LS("lyrisEras.base", base ? JSON.stringify(base) : null); LS("lyrisEras.sha", sha); }
+function touch(id) { dirty.add(id); saveLocal(); updateSaveBar(); }
+
+// ---------- GitHub ----------
+const api = (p, opt = {}) => fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/${p}`, Object.assign({ cache: "no-store" }, opt, {
+  headers: Object.assign({ "Accept": "application/vnd.github+json", "Authorization": "Bearer " + cfg.token, "X-GitHub-Api-Version": "2022-11-28" }, opt.headers || {})
+}));
+const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
+const b64enc = s => { const b = new TextEncoder().encode(s); let o = ""; for (let i = 0; i < b.length; i += 0x8000) o += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(o); };
+
+async function fetchRemote() {
+  const r = await api(`contents/${cfg.path}?ref=${encodeURIComponent(cfg.branch)}`);
+  if (r.status === 401) throw new Error("GitHub rejected the token (401). Check it in Settings.");
+  if (r.status === 404) throw new Error(`Couldn't find ${cfg.path} on ${cfg.branch} (404). Check the repo, branch and that the token can read it.`);
+  if (!r.ok) throw new Error("GitHub error " + r.status);
+  const j = await r.json();
+  return { sha: j.sha, data: JSON.parse(b64dec(j.content)) };
+}
+
+async function loadFromGitHub(keepLocal) {
+  const remote = await fetchRemote();
+  if (keepLocal && data && dirty.size) { data = merge(remote.data, data, base); }
+  else { data = remote.data; dirty.clear(); }
+  sha = remote.sha; base = JSON.parse(JSON.stringify(remote.data));
+  saveLocal(); render(); updateSaveBar();
+}
+
+// three-way merge: start from remote, re-apply what changed locally
+function merge(remote, local, baseCopy) {
+  const out = JSON.parse(JSON.stringify(remote));
+  const byId = a => Object.fromEntries((a || []).map(x => [x.id, x]));
+  const lI = byId(local.ideas), bI = byId(baseCopy ? baseCopy.ideas : []), oI = byId(out.ideas);
+  for (const id of dirty) {
+    if (id.startsWith("era:")) { const eid = id.slice(4); const le = local.eras.find(e => e.id === eid); const oe = out.eras.find(e => e.id === eid); if (le && oe) Object.assign(oe, le); continue; }
+    if (lI[id]) { if (oI[id]) Object.assign(oI[id], lI[id]); else out.ideas.push(lI[id]); }
+    else if (bI[id] || oI[id]) { out.ideas = out.ideas.filter(x => x.id !== id); }   // deleted here
+  }
+  return out;
+}
+
+async function saveToGitHub() {
+  if (!cfg.token) { openSettings(); toast("Add a GitHub token first"); return; }
+  const btn = $("#saveBtn"); btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    let remote = await fetchRemote();
+    if (remote.sha !== sha) { data = merge(remote.data, data, base); toast("Merged with newer changes from GitHub"); }
+    const n = dirty.size;
+    const body = { message: `Era tracker: ${n} change${n === 1 ? "" : "s"}`, content: b64enc(JSON.stringify(data, null, 1) + "\n"), sha: remote.sha, branch: cfg.branch };
+    let r = await api(`contents/${cfg.path}`, { method: "PUT", body: JSON.stringify(body) });
+    if (r.status === 409 || r.status === 422) {   // someone saved in between: merge once more
+      remote = await fetchRemote(); data = merge(remote.data, data, base);
+      body.sha = remote.sha; body.content = b64enc(JSON.stringify(data, null, 1) + "\n");
+      r = await api(`contents/${cfg.path}`, { method: "PUT", body: JSON.stringify(body) });
+    }
+    if (r.status === 403) throw new Error("The token can read but not write. Give it Contents: Read and write.");
+    if (!r.ok) throw new Error("Save failed: GitHub error " + r.status);
+    const j = await r.json();
+    sha = j.content.sha; base = JSON.parse(JSON.stringify(data)); dirty.clear();
+    saveLocal(); render(); toast(`Saved ${n} change${n === 1 ? "" : "s"} to ${cfg.branch}`);
+  } catch (e) { toast(e.message, 5000); }
+  btn.disabled = false; btn.textContent = "Save to GitHub"; updateSaveBar();
+}
+
+function updateSaveBar() {
+  const bar = $("#savebar");
+  if (!data || !dirty.size) { bar.classList.add("hide"); return; }
+  bar.classList.remove("hide");
+  $("#saveMsg").textContent = `${dirty.size} unsaved change${dirty.size === 1 ? "" : "s"}` + (cfg.token ? "" : " (kept in this browser)");
+}
+
+// ---------- helpers ----------
+const eraById = id => data.eras.find(e => e.id === id);
+const sysById = id => data.systems.find(s => s.id === id);
+const eraName = id => id === "someday" ? "Someday" : (eraById(id) || {}).name || id;
+function counts(list) { const c = { raw: 0, designed: 0, built: 0, tuned: 0 }; list.forEach(i => c[i.status] = (c[i.status] || 0) + 1); return c; }
+function barHTML(c) { const t = STATUS.reduce((a, s) => a + c[s], 0) || 1; return `<div class="bar">${STATUS.map(s => c[s] ? `<span class="s-${s}" style="width:${c[s] / t * 100}%"></span>` : "").join("")}</div>`; }
+function matches(i) {
+  if (fStatus.size && !fStatus.has(i.status)) return false;
+  if (fSystem && i.system !== fSystem) return false;
+  if (fEra && i.era !== fEra) return false;
+  if (q) { const s = q.toLowerCase(); if (!(i.title + " " + i.notes + " " + (sysById(i.system) || {}).name).toLowerCase().includes(s)) return false; }
+  return true;
+}
+const filtering = () => !!(q || fStatus.size || fSystem || fEra);
+
+// ---------- render ----------
+function render() {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.v === view));
+  const m = $("#main");
+  if (!data) { m.innerHTML = welcomeHTML(); bindWelcome(); return; }
+  let h = toolsHTML();
+  if (view === "eras") h += erasHTML(); else if (view === "grid") h += gridHTML(); else h += somedayHTML();
+  m.innerHTML = h; bindMain();
+}
+
+function toolsHTML() {
+  const all = data.ideas, c = counts(all);
+  let h = `<div class="stats">${STATUS.map(s => `<div class="stat-card"><b>${c[s]}</b><span><i class="dot s-${s}"></i>${STATUS_LABEL[s]}</span></div>`).join("")}</div>`;
+  h += `<div class="tools"><input type="search" id="q" placeholder="Search ideas" value="${esc(q)}">
+    <select id="fSys"><option value="">All systems</option>${data.systems.map(s => `<option value="${s.id}" ${fSystem === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
+    <div class="chips">${STATUS.map(s => `<button class="chip ${fStatus.has(s) ? "on" : ""}" data-fs="${s}"><i class="dot s-${s}"></i>${STATUS_LABEL[s]}</button>`).join("")}</div></div>`;
+  if (fEra) h += `<div class="filterline">Showing ${esc(eraName(fEra))}${fSystem ? " · " + esc(sysById(fSystem).name) : ""} <button id="clearF">clear</button></div>`;
+  return h;
+}
+
+function ideaRow(i, showSys) {
+  const sys = sysById(i.system);
+  return `<div class="idea" data-id="${esc(i.id)}">
+    <button class="stat s-${i.status}" data-cycle="${esc(i.id)}" title="${STATUS_LABEL[i.status]}: tap to advance" aria-label="Status ${STATUS_LABEL[i.status]}"></button>
+    <div class="tt"><b>${esc(i.title)}</b>${dirty.has(i.id) ? ' <span class="dirty-mark">•</span>' : ""}${i.notes ? `<div>${esc(i.notes)}</div>` : ""}</div>
+    ${showSys && sys ? `<div class="sl">${esc(sys.name)}</div>` : ""}</div>`;
+}
+
+function eraCard(e, idx) {
+  const ideas = data.ideas.filter(i => i.era === e.id), shown = ideas.filter(matches), c = counts(ideas);
+  const open = openEras.has(e.id) || (filtering() && shown.length);
+  if (filtering() && !shown.length) return "";
+  const done = c.built + c.tuned;
+  let body = "";
+  if (!shown.length) body = `<div class="empty">No ideas here yet.</div>`;
+  else for (const s of data.systems) {
+    const g = shown.filter(i => i.system === s.id).sort((a, b) => STATUS.indexOf(b.status) - STATUS.indexOf(a.status));
+    if (g.length) body += `<div class="sysgrp"><h4>${esc(s.name)}</h4>${g.map(i => ideaRow(i, false)).join("")}</div>`;
+  }
+  return `<section class="era ${open ? "open" : ""}" data-era="${e.id}">
+    <div class="era-h" data-toggle="${e.id}"><div class="num">${idx}</div>
+      <div class="era-t"><h3>${esc(e.name)}${dirty.has("era:" + e.id) ? ' <span class="dirty-mark">•</span>' : ""}</h3>
+        <div class="ms">Milestone: <b>${esc(e.milestone)}</b></div>${barHTML(c)}
+        <div class="meta"><span class="badge ${e.status}">${ERA_STATUS[e.status] || e.status}</span><span>${ideas.length} ideas · ${done} built</span></div></div>
+      <svg class="chev" width="14" height="14" viewBox="0 0 14 14"><path d="M5 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+    <div class="era-b">${body}<div class="era-actions"><button class="btn" data-add="${e.id}">+ Add idea</button><button class="btn ghost" data-editera="${e.id}">Edit era</button></div></div></section>`;
+}
+
+function erasHTML() {
+  let h = "", n = 0;
+  for (const p of data.phases) {
+    const eras = data.eras.filter(e => e.phase === p.id);
+    const cards = eras.map(e => eraCard(e, ++n)).join("");
+    if (!cards) continue;
+    h += `<div class="phase"><h2>PHASE ${ROMAN[p.id] || p.id} · ${esc(p.name.toUpperCase())}</h2><span class="cap">Capstone: ${esc(p.capstone)}</span></div>` + cards;
+  }
+  return h || `<p>No ideas match.</p>`;
+}
+
+function somedayHTML() {
+  const list = data.ideas.filter(i => i.era === "someday" && matches(i));
+  return `<div class="phase"><h2>SOMEDAY</h2><span class="cap">Good ideas that don't belong to an era yet</span></div>
+    <section class="era open"><div class="era-b" style="display:block">${list.length ? list.map(i => ideaRow(i, true)).join("") : '<div class="empty">Nothing parked here.</div>'}
+    <div class="era-actions"><button class="btn" data-add="someday">+ Park an idea</button></div></div></section>`;
+}
+
+function gridHTML() {
+  let h = `<div class="gridwrap"><table class="grid"><thead><tr><th class="rowh"></th>${data.systems.map(s => `<th><span>${esc(s.name)}</span></th>`).join("")}</tr></thead><tbody>`;
+  let n = 0;
+  const rows = [...data.phases.map(p => ({ p, eras: data.eras.filter(e => e.phase === p.id) })), { p: { id: 0, name: "Someday" }, eras: [{ id: "someday", name: "Someday" }] }];
+  for (const { p, eras } of rows) {
+    h += `<tr class="ph"><th colspan="${data.systems.length + 1}">${p.id ? "PHASE " + ROMAN[p.id] + " · " : ""}${esc(p.name.toUpperCase())}</th></tr>`;
+    for (const e of eras) {
+      if (e.id !== "someday") n++;
+      h += `<tr><th class="rowh">${e.id !== "someday" ? n + ". " : ""}${esc(e.name)}</th>`;
+      for (const s of data.systems) {
+        const l = data.ideas.filter(i => i.era === e.id && i.system === s.id && (!q || matches(i)));
+        const c = counts(l);
+        h += `<td class="${l.length ? "" : "zero"}"><button data-cell="${e.id}|${s.id}" aria-label="${esc(e.name)}, ${esc(s.name)}: ${l.length}">${l.length ? `<div class="cell"><em>${l.length}</em>${barHTML(c)}</div>` : "·"}</button></td>`;
+      }
+      h += "</tr>";
+    }
+  }
+  h += `</tbody></table></div><div class="legend">${STATUS.map(s => `<span><i class="dot s-${s}"></i>${STATUS_LABEL[s]}</span>`).join("")}<span>Tap a square to see or add its ideas. Empty squares show where a system goes quiet.</span></div>`;
+  return h;
+}
+
+function welcomeHTML() {
+  return `<div class="welcome"><h2>Connect your idea list</h2>
+  <p>Your eras and ideas live in a file in your private game repo, so this page shows nothing until you connect. Saving makes a commit there.</p>
+  <ol><li>On GitHub: <b>Settings → Developer settings → Fine-grained tokens → Generate new token</b>.</li>
+  <li>Repository access: <b>Only select repositories → ${esc(cfg.repo)}</b>. Permissions: <b>Contents: Read and write</b>.</li>
+  <li>Paste the token in Settings here. It stays in this browser only.</li></ol>
+  <div class="era-actions" style="margin:14px 0 0"><button class="btn brass" id="wConnect">Open settings</button><button class="btn" id="wImport">Load a file instead</button></div>
+  <input type="file" id="wFile" accept=".json,application/json" hidden></div>`;
+}
+function bindWelcome() {
+  $("#wConnect").onclick = openSettings;
+  $("#wImport").onclick = () => $("#wFile").click();
+  $("#wFile").onchange = importFile;
+}
+function importFile(ev) {
+  const f = ev.target.files[0]; if (!f) return;
+  f.text().then(t => { const d = JSON.parse(t); if (!d.eras || !d.ideas) throw new Error("Not an eras file"); data = d; base = null; sha = null; dirty.clear(); saveLocal(); closeSheet(); render(); toast("Loaded " + f.name + " (local only)"); }).catch(e => toast(e.message));
+}
+
+function bindMain() {
+  const qi = $("#q"); if (qi) qi.oninput = e => { q = e.target.value; const pos = e.target.selectionStart; render(); const n = $("#q"); n.focus(); n.setSelectionRange(pos, pos); };
+  const fs = $("#fSys"); if (fs) fs.onchange = e => { fSystem = e.target.value; render(); };
+  document.querySelectorAll("[data-fs]").forEach(b => b.onclick = () => { const s = b.dataset.fs; fStatus.has(s) ? fStatus.delete(s) : fStatus.add(s); render(); });
+  const cf = $("#clearF"); if (cf) cf.onclick = () => { fEra = ""; fSystem = ""; render(); };
+  document.querySelectorAll("[data-toggle]").forEach(b => b.onclick = () => { const id = b.dataset.toggle; openEras.has(id) ? openEras.delete(id) : openEras.add(id); LS("lyrisEras.open", JSON.stringify([...openEras])); b.parentElement.classList.toggle("open"); });
+  document.querySelectorAll("[data-cycle]").forEach(b => b.onclick = ev => { ev.stopPropagation(); const i = data.ideas.find(x => x.id === b.dataset.cycle); i.status = STATUS[(STATUS.indexOf(i.status) + 1) % STATUS.length]; i.updated = today(); touch(i.id); render(); toast(`${i.title}: ${STATUS_LABEL[i.status]}`); });
+  document.querySelectorAll(".idea").forEach(r => r.onclick = () => openIdea(r.dataset.id));
+  document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => openIdea(null, { era: b.dataset.add, system: fSystem || data.systems[0].id }));
+  document.querySelectorAll("[data-editera]").forEach(b => b.onclick = () => openEra(b.dataset.editera));
+  document.querySelectorAll("[data-cell]").forEach(b => b.onclick = () => { const [e, s] = b.dataset.cell.split("|"); fEra = e; fSystem = s; view = e === "someday" ? "someday" : "eras"; openEras.add(e); render(); window.scrollTo(0, 0); });
+}
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+// ---------- sheets ----------
+function openSheet(html) { $("#sheet").innerHTML = html; $("#scrim").classList.add("on"); $("#sheet").classList.add("on"); }
+function closeSheet() { $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); }
+$("#scrim").onclick = closeSheet;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+function eraOptions(sel) {
+  let h = "";
+  for (const p of data.phases) h += `<optgroup label="Phase ${ROMAN[p.id]}: ${esc(p.name)}">${data.eras.filter(e => e.phase === p.id).map(e => `<option value="${e.id}" ${sel === e.id ? "selected" : ""}>${esc(e.name)}</option>`).join("")}</optgroup>`;
+  return h + `<option value="someday" ${sel === "someday" ? "selected" : ""}>Someday</option>`;
+}
+
+function openIdea(id, preset) {
+  const isNew = !id;
+  const i = isNew ? Object.assign({ id: "", title: "", notes: "", status: "raw", deps: [], era: "stone", system: data.systems[0].id }, preset) : JSON.parse(JSON.stringify(data.ideas.find(x => x.id === id)));
+  const usedBy = isNew ? [] : data.ideas.filter(x => (x.deps || []).includes(i.id));
+  openSheet(`<h3>${isNew ? "New idea" : "Edit idea"}<button class="iconbtn" style="color:var(--ink);border-color:#33251a40" id="xS">✕</button></h3>
+    <label>Idea</label><input id="iT" value="${esc(i.title)}" placeholder="e.g. Smoking racks">
+    <label>Status</label><div class="seg" id="iS">${STATUS.map(s => `<button data-s="${s}" class="${i.status === s ? "on" : ""}"><i class="dot s-${s}"></i>${STATUS_LABEL[s]}</button>`).join("")}</div>
+    <div class="row"><div><label>Era</label><select id="iE">${eraOptions(i.era)}</select></div><div><label>System</label><select id="iY">${data.systems.map(s => `<option value="${s.id}" ${i.system === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div></div>
+    <label>Notes</label><textarea id="iN" placeholder="How it plays, what it needs, open questions">${esc(i.notes)}</textarea>
+    <label>Needs first</label><input id="iD" list="ideaList" placeholder="Type to pick an idea this depends on"><datalist id="ideaList">${data.ideas.filter(x => x.id !== i.id).map(x => `<option value="${esc(x.title)} — ${esc(eraName(x.era))}"></option>`).join("")}</datalist>
+    <div class="deps" id="iDeps"></div>
+    ${usedBy.length ? `<div class="usedby">Needed by: ${usedBy.map(x => esc(x.title)).join(", ")}</div>` : ""}
+    <div class="foot">${isNew ? "<span></span>" : '<button class="btn danger" id="iDel">Delete</button>'}<span style="display:flex;gap:8px"><button class="btn ghost" id="iC">Cancel</button><button class="btn brass" id="iOk">${isNew ? "Add idea" : "Done"}</button></span></div>`);
+  let deps = [...(i.deps || [])], status = i.status;
+  const drawDeps = () => $("#iDeps").innerHTML = deps.map(d => { const x = data.ideas.find(y => y.id === d); return `<span class="chip">${esc(x ? x.title : d)} <button data-rm="${esc(d)}" style="border:0;background:none;padding:0">✕</button></span>`; }).join("");
+  drawDeps();
+  $("#iDeps").onclick = e => { const r = e.target.dataset.rm; if (r) { deps = deps.filter(d => d !== r); drawDeps(); } };
+  $("#iD").onchange = e => { const v = e.target.value; const x = data.ideas.find(y => `${y.title} — ${eraName(y.era)}` === v); if (x && !deps.includes(x.id) && x.id !== i.id) { deps.push(x.id); drawDeps(); } e.target.value = ""; };
+  $("#iS").onclick = e => { const b = e.target.closest("button"); if (!b) return; status = b.dataset.s; $("#iS").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); };
+  $("#xS").onclick = $("#iC").onclick = closeSheet;
+  if (!isNew) $("#iDel").onclick = () => { if (!confirm(`Delete "${i.title}"?`)) return; data.ideas = data.ideas.filter(x => x.id !== i.id); data.ideas.forEach(x => x.deps = (x.deps || []).filter(d => d !== i.id)); touch(i.id); closeSheet(); render(); };
+  $("#iOk").onclick = () => {
+    const title = $("#iT").value.trim(); if (!title) { $("#iT").focus(); return; }
+    const upd = { title, notes: $("#iN").value.trim(), status, era: $("#iE").value, system: $("#iY").value, deps, updated: today() };
+    if (isNew) {
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32);
+      let nid = `${upd.era}-${slug}`; while (data.ideas.some(x => x.id === nid)) nid += "-" + Math.random().toString(36).slice(2, 5);
+      data.ideas.push(Object.assign({ id: nid }, upd)); touch(nid);
+    } else { Object.assign(data.ideas.find(x => x.id === i.id), upd); touch(i.id); }
+    openEras.add(upd.era); closeSheet(); render();
+  };
+  if (isNew) setTimeout(() => $("#iT").focus(), 200);
+}
+
+function openEra(id) {
+  const e = eraById(id);
+  openSheet(`<h3>${esc(e.name)}<button class="iconbtn" style="color:var(--ink);border-color:#33251a40" id="xS">✕</button></h3>
+    <label>Era name</label><input id="eN" value="${esc(e.name)}">
+    <label>Milestone (what ends the era)</label><input id="eM" value="${esc(e.milestone)}">
+    <label>Era status</label><div class="seg" id="eS">${Object.keys(ERA_STATUS).map(s => `<button data-s="${s}" class="${e.status === s ? "on" : ""}">${ERA_STATUS[s]}</button>`).join("")}</div>
+    <label>Notes</label><textarea id="eT" placeholder="The feel of this era, what changes for the player">${esc(e.notes || "")}</textarea>
+    <div class="foot"><span></span><span style="display:flex;gap:8px"><button class="btn ghost" id="eC">Cancel</button><button class="btn brass" id="eOk">Done</button></span></div>`);
+  let st = e.status;
+  $("#eS").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; st = b.dataset.s; $("#eS").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); };
+  $("#xS").onclick = $("#eC").onclick = closeSheet;
+  $("#eOk").onclick = () => { Object.assign(e, { name: $("#eN").value.trim() || e.name, milestone: $("#eM").value.trim(), status: st, notes: $("#eT").value.trim() }); touch("era:" + e.id); closeSheet(); render(); };
+}
+
+function openSettings() {
+  openSheet(`<h3>Settings<button class="iconbtn" style="color:var(--ink);border-color:#33251a40" id="xS">✕</button></h3>
+    <label>GitHub token</label><input id="sT" type="password" autocomplete="off" value="${esc(cfg.token)}" placeholder="github_pat_…">
+    <div class="hint">Fine-grained token, only the ${esc(cfg.repo)} repo, Contents: Read and write. Stored in this browser only. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Make one</a></div>
+    <div class="row"><div><label>Owner</label><input id="sO" value="${esc(cfg.owner)}"></div><div><label>Repo</label><input id="sR" value="${esc(cfg.repo)}"></div></div>
+    <div class="row"><div><label>Branch</label><input id="sB" value="${esc(cfg.branch)}"></div><div><label>File</label><input id="sP" value="${esc(cfg.path)}"></div></div>
+    <div class="foot"><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="sExp">Export JSON</button><button class="btn ghost" id="sImp">Load file</button><button class="btn danger" id="sForget">Forget token</button></span>
+    <span style="display:flex;gap:8px"><button class="btn brass" id="sOk">Connect</button></span></div>
+    <input type="file" id="sFile" accept=".json,application/json" hidden>`);
+  $("#xS").onclick = closeSheet;
+  $("#sExp").onclick = () => { if (!data) return toast("Nothing loaded yet"); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" })); a.download = "eras.json"; a.click(); };
+  $("#sImp").onclick = () => $("#sFile").click(); $("#sFile").onchange = importFile;
+  $("#sForget").onclick = () => { cfg.token = ""; LS("lyrisEras.cfg", JSON.stringify(cfg)); $("#sT").value = ""; toast("Token removed from this browser"); };
+  $("#sOk").onclick = async () => {
+    const prevSrc = cfg.owner + cfg.repo + cfg.branch + cfg.path;
+    cfg = { token: $("#sT").value.trim(), owner: $("#sO").value.trim(), repo: $("#sR").value.trim(), branch: $("#sB").value.trim(), path: $("#sP").value.trim() };
+    LS("lyrisEras.cfg", JSON.stringify(cfg));
+    if (!cfg.token) return toast("Paste a token to connect");
+    const btn = $("#sOk"); btn.textContent = "Connecting…"; btn.disabled = true;
+    try { await loadFromGitHub(prevSrc === cfg.owner + cfg.repo + cfg.branch + cfg.path); closeSheet(); toast("Connected to " + cfg.repo + " / " + cfg.branch); }
+    catch (e) { toast(e.message, 5000); btn.textContent = "Connect"; btn.disabled = false; }
+  };
+}
+
+$("#tabs").onclick = e => { const b = e.target.closest(".tab"); if (!b) return; view = b.dataset.v; if (view !== "eras") fEra = ""; render(); };
+$("#addBtn").onclick = () => data ? openIdea(null, { era: fEra || (view === "someday" ? "someday" : "stone"), system: fSystem || data.systems[0].id }) : openSettings();
+$("#setBtn").onclick = openSettings;
+$("#saveBtn").onclick = saveToGitHub;
+window.addEventListener("beforeunload", e => { if (dirty.size && cfg.token) { e.preventDefault(); e.returnValue = ""; } });
+
+// ---------- start ----------
+(async function start() {
+  try { data = JSON.parse(LS("lyrisEras.data") || "null"); base = JSON.parse(LS("lyrisEras.base") || "null"); sha = LS("lyrisEras.sha"); } catch (e) { data = null; }
+  render(); updateSaveBar();
+  if (cfg.token) {
+    try { await loadFromGitHub(true); if (dirty.size) toast(`Loaded from GitHub; ${dirty.size} unsaved change${dirty.size === 1 ? "" : "s"} kept`); }
+    catch (e) { toast((data ? "Working offline. " : "") + e.message, 5000); }
+  }
+})();
+</script>
+</body>
+</html>
