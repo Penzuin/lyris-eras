@@ -454,6 +454,7 @@ function openSettings() {
     <div class="hint">Fine-grained token, only the ${esc(cfg.repo)} repo, Contents: Read and write. Stored in this browser only. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Make one</a></div>
     <div class="row"><div><label>Owner</label><input id="sO" value="${esc(cfg.owner)}"></div><div><label>Repo</label><input id="sR" value="${esc(cfg.repo)}"></div></div>
     <div class="row"><div><label>Branch</label><input id="sB" value="${esc(cfg.branch)}"></div><div><label>File</label><input id="sP" value="${esc(cfg.path)}"></div></div>
+    <div id="sMsg" class="hint" style="font-weight:500;min-height:1.2em"></div>
     <div class="foot"><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="sExp">Export JSON</button><button class="btn ghost" id="sImp">Load file</button><button class="btn danger" id="sForget">Forget token</button></span>
     <span style="display:flex;gap:8px"><button class="btn brass" id="sOk">Connect</button></span></div>
     <input type="file" id="sFile" accept=".json,application/json" hidden>`);
@@ -465,10 +466,11 @@ function openSettings() {
     const prevSrc = cfg.owner + cfg.repo + cfg.branch + cfg.path;
     cfg = { token: $("#sT").value.trim(), owner: $("#sO").value.trim(), repo: $("#sR").value.trim(), branch: $("#sB").value.trim(), path: $("#sP").value.trim() };
     LS("lyrisEras.cfg", JSON.stringify(cfg));
-    if (!cfg.token) return toast("Paste a token to connect");
-    const btn = $("#sOk"); btn.textContent = "Connecting…"; btn.disabled = true;
-    try { await loadFromGitHub(prevSrc === cfg.owner + cfg.repo + cfg.branch + cfg.path); closeSheet(); toast("Connected to " + cfg.repo + " / " + cfg.branch); }
-    catch (e) { toast(e.message, 5000); btn.textContent = "Connect"; btn.disabled = false; }
+    const msg = $("#sMsg"); msg.style.color = "";
+    if (!cfg.token) { msg.textContent = "Paste your token in the first box, then tap Connect."; return; }
+    const btn = $("#sOk"); btn.textContent = "Connecting…"; btn.disabled = true; msg.textContent = "Connecting to GitHub…";
+    try { await loadFromGitHub(prevSrc === cfg.owner + cfg.repo + cfg.branch + cfg.path); closeSheet(); toast("Connected: " + data.ideas.length + " ideas loaded"); window.scrollTo(0, 0); }
+    catch (e) { msg.style.color = "var(--danger)"; msg.textContent = "Couldn't connect: " + (e.message === "Load failed" || e.message === "Failed to fetch" ? "no answer from GitHub (check your connection)." : e.message); btn.textContent = "Connect"; btn.disabled = false; }
   };
 }
 
