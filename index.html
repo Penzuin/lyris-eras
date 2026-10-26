@@ -186,9 +186,12 @@ function saveLocal() { LS("lyrisEras.data", JSON.stringify(data)); LS("lyrisEras
 function touch(id) { dirty.add(id); saveLocal(); updateSaveBar(); }
 
 // ---------- GitHub ----------
-const api = (p, opt = {}) => fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/${p}`, Object.assign({ cache: "no-store" }, opt, {
-  headers: Object.assign({ "Accept": "application/vnd.github+json", "Authorization": "Bearer " + cfg.token, "X-GitHub-Api-Version": "2022-11-28" }, opt.headers || {})
-}));
+const api = (p, opt = {}) => {
+  const get = !opt.method || opt.method === "GET";
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/${p}` + (get ? (p.includes("?") ? "&" : "?") + "t=" + Date.now() : "");
+  return fetch(url, Object.assign({}, opt, { headers: Object.assign({ "Accept": "application/vnd.github+json", "Authorization": "token " + cfg.token }, opt.headers || {}) }));
+};
+let lastError = "";
 const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
 const b64enc = s => { const b = new TextEncoder().encode(s); let o = ""; for (let i = 0; i < b.length; i += 0x8000) o += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(o); };
 
@@ -360,6 +363,7 @@ function welcomeHTML() {
   <ol><li>On GitHub: <b>Settings → Developer settings → Fine-grained tokens → Generate new token</b>.</li>
   <li>Repository access: <b>Only select repositories → ${esc(cfg.repo)}</b>. Permissions: <b>Contents: Read and write</b>.</li>
   <li>Paste the token in Settings here. It stays in this browser only.</li></ol>
+  ${lastError ? `<p style="color:var(--danger);font-weight:500">Last try: ${esc(lastError)}</p>` : ""}
   <div class="era-actions" style="margin:14px 0 0"><button class="btn brass" id="wConnect">Open settings</button><button class="btn" id="wImport">Load a file instead</button></div>
   <input type="file" id="wFile" accept=".json,application/json" hidden></div>`;
 }
@@ -470,7 +474,7 @@ function openSettings() {
     if (!cfg.token) { msg.textContent = "Paste your token in the first box, then tap Connect."; return; }
     const btn = $("#sOk"); btn.textContent = "Connecting…"; btn.disabled = true; msg.textContent = "Connecting to GitHub…";
     try { await loadFromGitHub(prevSrc === cfg.owner + cfg.repo + cfg.branch + cfg.path); closeSheet(); toast("Connected: " + data.ideas.length + " ideas loaded"); window.scrollTo(0, 0); }
-    catch (e) { msg.style.color = "var(--danger)"; msg.textContent = "Couldn't connect: " + (e.message === "Load failed" || e.message === "Failed to fetch" ? "no answer from GitHub (check your connection)." : e.message); btn.textContent = "Connect"; btn.disabled = false; }
+    catch (e) { msg.style.color = "var(--danger)"; msg.textContent = "Couldn't connect: " + (e.message === "Load failed" || e.message === "Failed to fetch" ? "no answer from GitHub (" + e.message + ")." : e.message); btn.textContent = "Connect"; btn.disabled = false; }
   };
 }
 
@@ -491,7 +495,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
   render(); updateSaveBar();
   if (cfg.token) {
     try { await loadFromGitHub(true); if (dirty.size) toast(`Loaded from GitHub; ${dirty.size} unsaved change${dirty.size === 1 ? "" : "s"} kept`); }
-    catch (e) { toast((data ? "Working offline. " : "") + e.message, 5000); }
+    catch (e) { lastError = e.message === "Load failed" || e.message === "Failed to fetch" ? "No answer from GitHub (" + e.message + ")." : e.message; render(); toast((data ? "Working offline. " : "") + lastError, 6000); }
   }
 })();
 </script>
